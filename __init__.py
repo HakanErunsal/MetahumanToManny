@@ -7,7 +7,7 @@ bl_info = {
     "blender": (4, 2, 4),
     "category": "Object",
     "author": "Hakan",
-    "version": (1, 1, 0),
+    "version": (1, 1, 1),
     "description": "Collection of tools for cleaning up armature vertex groups and fixing issues to make it compatible with Manny.",
     "support": "COMMUNITY",
     "doc_url": "",

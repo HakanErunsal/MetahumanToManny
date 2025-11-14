@@ -59,48 +59,67 @@ class SetupLodHierarchyOperator(bpy.types.Operator):
             self.report({'ERROR'}, "No LOD meshes found.")
             return {'CANCELLED'}
         
-        # Look for the LodGroup object
+        # Look for or create the LodGroup object
         lod_group_name = f"{prefix}_LodGroup"
+
+        # Always delete existing LodGroup object if it exists
         lod_group = bpy.data.objects.get(lod_group_name)
-        
-        if not lod_group:
-            self.report({'ERROR'}, f"LodGroup object '{lod_group_name}' not found.")
-            return {'CANCELLED'}
-        
+        if lod_group:
+            # Unlink from all collections
+            for coll in lod_group.users_collection:
+                coll.objects.unlink(lod_group)
+            # Remove from bpy.data.objects
+            bpy.data.objects.remove(lod_group)
+            print(f"Deleted existing LodGroup object: {lod_group_name}")
+
+        # Create a new empty object with the required name
+        lod_group = bpy.data.objects.new(lod_group_name, None)
+        lod_group.empty_display_type = 'PLAIN_AXES'
+        lod_group.scale = (0.01, 0.01, 0.01)
+        context.collection.objects.link(lod_group)
+        print(f"Created new LodGroup object: {lod_group_name} (Empty, scale 0.01)")
+
         print(f"\n=== Setting up LOD hierarchy ===")
         print(f"LodGroup: {lod_group_name}")
         print(f"LOD meshes to parent: {[obj.name for obj in lod_meshes]}")
-        
+
         # IMPORTANT: Sort LOD meshes by their LOD number to ensure correct order in FBX export
         def get_lod_number(obj):
             match = re.search(r'_LOD(\d+)$', obj.name)
             return int(match.group(1)) if match else 999
-        
+
         lod_meshes.sort(key=get_lod_number)
         print(f"Sorted order: {[obj.name for obj in lod_meshes]}")
-        
+
+
         # Parent all LOD meshes to the LodGroup with keep transform
         for lod_mesh in lod_meshes:
             # Store current world matrix
-            old_matrix = lod_mesh.matrix_world.copy()
-            
-            # Set parent
-            lod_mesh.parent = lod_group
-            
-            # Restore world transform (keep transform)
-            lod_mesh.matrix_world = old_matrix
-            
-            print(f"Parented {lod_mesh.name} to {lod_group_name}")
-        
+            # old_matrix = lod_mesh.matrix_world.copy()
+
+            # Set parent with keep transform
+            # lod_mesh.parent = lod_group
+            # lod_mesh.matrix_parent_inverse.identity()
+            # lod_mesh.matrix_world = old_matrix
+
+            bpy.ops.object.select_all(action='DESELECT')
+            lod_group.select_set(True)
+            lod_mesh.select_set(True)
+            bpy.context.view_layer.objects.active = lod_group
+
+            bpy.ops.object.parent_set(type='OBJECT', keep_transform=True)
+
+            print(f"Parented {lod_mesh.name} to {lod_group_name} (keep transform)")
+
         # Add custom property to LodGroup for Unreal Engine
         lod_group["fbx_type"] = "LodGroup"
-        
+
         # Set the property metadata (description)
         id_props = lod_group.id_properties_ui("fbx_type")
         id_props.update(description="This object is for unreal to recognize lods")
-        
+
         print(f"Added custom property 'fbx_type' = 'LodGroup' to {lod_group_name}")
-        
+
         self.report({'INFO'}, f"LOD hierarchy setup complete! Parented {len(lod_meshes)} mesh(es) to {lod_group_name}")
         return {'FINISHED'}
 
