@@ -27,3 +27,19 @@ Tools to clean up MetaHuman meshes for Manny skeleton compatibility. Focus on ve
 - Fix Finger Bulges (`object.fix_finger_bulges`)
   - Active object must be a Mesh. Merges `*_bulge` groups into base groups and removes bulges.
 
+## Dev quick reload
+- Window → Toggle System Console (to see logs)
+- F3 → "Reload Scripts", then re-enable addon if needed
+- Or in Blender Python console:
+```python
+import importlib, MetahumanToManny as M
+importlib.reload(M); importlib.reload(M.operators.cleanup_bone_weights)
+M.unregister(); M.register()
+```
+
+## Packaging (Windows)
+- From this folder in PowerShell:
+```powershell
+scripts\package.ps1 -Version "1.1.0"
+```
+Creates `dist/MetahumanToManny-1.1.0.zip` excluding caches.

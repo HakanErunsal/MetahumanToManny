@@ -38,30 +38,28 @@ def find_all_lod_meshes(base_mesh):
     else:
         return [base_mesh]
 
-class CleanUpUnusedVertexGroupsOperator(bpy.types.Operator):
-    bl_idname = "object.cleanup_unused_vertex_groups"
-    bl_label = "Clean Up Unused Vertex Groups"
-    bl_description = "Deletes vertex groups in the mesh that do not have a corresponding bone in the armature"
+class BindToMannyOperator(bpy.types.Operator):
+    bl_idname = "object.bind_to_manny"
+    bl_label = "Bind to Manny"
+    bl_description = "Binds selected mesh (and its LODs) to Manny skeleton with empty groups and scales to 0.01"
+    bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         settings = context.scene.metahuman_to_manny_settings
-        
-        # Ensure the correct objects are selected
         selected_objects = bpy.context.selected_objects
         
-        armature = None
         mesh = None
+        armature = None
         
-        # Identify the armature and the mesh from the selected objects
+        # Identify mesh and armature from selection
         for obj in selected_objects:
-            if obj.type == 'ARMATURE':
-                armature = obj
-            elif obj.type == 'MESH':
+            if obj.type == 'MESH':
                 mesh = obj
+            elif obj.type == 'ARMATURE':
+                armature = obj
         
-        # Check if both armature and mesh are selected
-        if not armature or not mesh:
-            self.report({'ERROR'}, "Please select both an armature and a mesh.")
+        if not mesh or not armature:
+            self.report({'ERROR'}, "Please select both a mesh and an armature (Manny skeleton).")
             return {'CANCELLED'}
         
         # Find all LOD meshes if enabled
@@ -73,41 +71,52 @@ class CleanUpUnusedVertexGroupsOperator(bpy.types.Operator):
         else:
             meshes_to_process = [mesh]
         
-        # Get the list of bones in the armature (once, used for all LODs)
-        bones_in_armature = {bone.name for bone in armature.pose.bones}
+        print(f"\n=== Binding to Manny skeleton ===")
+        print(f"Target armature: {armature.name}")
+        print(f"Meshes to bind: {[obj.name for obj in meshes_to_process]}")
         
         # Process each mesh
         total = len(meshes_to_process)
         for idx, target_mesh in enumerate(meshes_to_process):
             print(f"\n=== Processing {target_mesh.name} ({idx + 1}/{total}) ===")
-            self.cleanup_unused_groups(target_mesh, bones_in_armature)
+            
+            # Clear selection and select only the current mesh
+            bpy.ops.object.select_all(action='DESELECT')
+            target_mesh.select_set(True)
+            context.view_layer.objects.active = target_mesh
+            
+            # Clear any existing parent with keep transform
+            if target_mesh.parent:
+                bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
+                print(f"Cleared parent from {target_mesh.name} (kept transform)")
+            
+            # Remove existing armature modifiers
+            for mod in list(target_mesh.modifiers):
+                if mod.type == 'ARMATURE':
+                    target_mesh.modifiers.remove(mod)
+            
+            # Select armature as well for parenting operation
+            armature.select_set(True)
+            context.view_layer.objects.active = armature
+            
+            # Set armature as parent with empty groups (using operator)
+            bpy.ops.object.parent_set(type='ARMATURE_NAME')
+            
+            print(f"Bound {target_mesh.name} to {armature.name} with empty groups")
+            
+            # Scale mesh to 0.01 (100 times smaller for Unreal to Blender conversion)
+            target_mesh.scale = (0.01, 0.01, 0.01)
+            
             self.report({'INFO'}, f"Completed {target_mesh.name} ({idx + 1}/{total})")
         
-        self.report({'INFO'}, f"All done! Processed {total} mesh(es) total")
+        self.report({'INFO'}, f"All done! Bound and scaled {total} mesh(es) to {armature.name}")
         return {'FINISHED'}
-    
-    def cleanup_unused_groups(self, mesh, bones_in_armature):
-        """Clean up unused vertex groups for a single mesh"""
-        # Go through each vertex group in the mesh and collect the ones to delete
-        vertex_groups_to_delete = []
-        for vg in mesh.vertex_groups:
-            if vg.name not in bones_in_armature:
-                vertex_groups_to_delete.append(vg.name)
-        
-        # Delete vertex groups that don't have a corresponding bone
-        for group_name in vertex_groups_to_delete:
-            vg = mesh.vertex_groups.get(group_name)  # Get the vertex group by name
-            if vg:
-                mesh.vertex_groups.remove(vg)  # Remove the vertex group
-                print(f"Deleted vertex group: {group_name}")
-        
-        print(f"Unused vertex groups deleted: {len(vertex_groups_to_delete)}")
 
 def register():
-    bpy.utils.register_class(CleanUpUnusedVertexGroupsOperator)
+    bpy.utils.register_class(BindToMannyOperator)
 
 def unregister():
-    bpy.utils.unregister_class(CleanUpUnusedVertexGroupsOperator)
+    bpy.utils.unregister_class(BindToMannyOperator)
 
 if __name__ == "__main__":
     register()
