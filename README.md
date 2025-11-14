@@ -14,32 +14,29 @@ Tools to clean up MetaHuman meshes for Manny skeleton compatibility. Focus on ve
 - 3D Viewport → Sidebar (N) → Tab: "MetahumanToManny" → Panel: "MetahumanToManny".
 
 ## Operators
-- Clean Up Face Bone Weights (`object.cleanup_bone_weights`)
-  - Select both a Mesh and its Armature. Merges child bone weights into `head`, `neck_02`, `neck_01`.
-- Fix Twist Bone Names (`object.fix_twist_bone_names`)
-  - Active object must be a Mesh. Renames `*twistCor*` groups to `*twist*` and removes duplicates.
-- Fix Seams (`object.fix_seams`)
-  - Active object must be a Mesh. Selects non-manifold and merges by distance (0.0001).
-- Fix Toes Vertex Groups (`object.fix_toes`)
-  - Active object must be a Mesh. Merges toe groups into `ball_l` / `ball_r`.
-- Clean Up Unused Vertex Groups (`object.cleanup_unused_vertex_groups`)
-  - Select both a Mesh and its Armature. Deletes mesh groups that don't map to pose bones.
-- Fix Finger Bulges (`object.fix_finger_bulges`)
-  - Active object must be a Mesh. Merges `*_bulge` groups into base groups and removes bulges.
 
-## Dev quick reload
-- Window → Toggle System Console (to see logs)
-- F3 → "Reload Scripts", then re-enable addon if needed
-- Or in Blender Python console:
-```python
-import importlib, MetahumanToManny as M
-importlib.reload(M); importlib.reload(M.operators.cleanup_bone_weights)
-M.unregister(); M.register()
-```
+### Face Cleanup
+- **Clean Up Face Bone Weights** (`object.cleanup_bone_weights`)
+  - Merges child bone weights into `head`, `neck_02`, `neck_01`.
 
-## Packaging (Windows)
-- From this folder in PowerShell:
-```powershell
-scripts\package.ps1 -Version "1.1.0"
-```
-Creates `dist/MetahumanToManny-1.1.0.zip` excluding caches.
+### Vertex Groups
+- **Cleanup All** (`object.cleanup_all_vertex_groups`)
+  - Runs all vertex group cleanup operations: Fix Twist Bones, Fix Finger Bulges, Fix Toes.
+- **Fix Twist Bone Names** (`object.fix_twist_bone_names`)
+  - Renames `*twistCor*` groups to `*twist*` and removes duplicates.
+- **Fix Finger Bulges** (`object.fix_finger_bulges`)
+  - Merges `*_bulge` groups into base groups and removes bulges.
+- **Fix Toes** (`object.fix_toes`)
+  - Merges toe groups into `ball_l` / `ball_r`.
+- **Cleanup Unused Groups** (`object.cleanup_unused_vertex_groups`)
+  - Select both a Mesh and its Armature. Deletes vertex groups that don't map to bones.
+
+### Mesh Cleanup
+- **Fix Seams** (`object.fix_seams`)
+  - Get rid of seams that cause problems after binding to new skeleton.
+
+### Hierarchy
+- **Setup LOD Hierarchy** (`object.setup_lod_hierarchy`)
+  - Sets up the LOD mesh hierarchy for the selected mesh.
+- **Bind to Manny** (`object.bind_to_manny`)
+  - Binds the selected mesh to the Manny skeleton.
