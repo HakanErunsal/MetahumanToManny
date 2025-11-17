@@ -105,7 +105,7 @@ class SetupLodHierarchyOperator(bpy.types.Operator):
             bpy.ops.object.select_all(action='DESELECT')
             lod_group.select_set(True)
             lod_mesh.select_set(True)
-            bpy.context.view_layer.objects.active = lod_group
+            context.view_layer.objects.active = lod_group
 
             bpy.ops.object.parent_set(type='OBJECT', keep_transform=True)
 

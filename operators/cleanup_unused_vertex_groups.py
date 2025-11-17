@@ -47,7 +47,7 @@ class CleanUpUnusedVertexGroupsOperator(bpy.types.Operator):
         settings = context.scene.metahuman_to_manny_settings
         
         # Ensure the correct objects are selected
-        selected_objects = bpy.context.selected_objects
+        selected_objects = context.selected_objects
         
         armature = None
         mesh = None

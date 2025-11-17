@@ -1,4 +1,3 @@
-import bpy
 from .operators import cleanup_bone_weights, fix_twist_bone_names, fix_seams, fix_toes, cleanup_unused_vertex_groups, fix_finger_bulges, setup_lod_hierarchy, cleanup_all_vertex_groups, bind_to_manny
 from .ui import panel
 

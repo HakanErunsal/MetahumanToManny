@@ -46,7 +46,7 @@ class CleanUpBoneWeightsOperator(bpy.types.Operator):
 
     def execute(self, context):
         settings = context.scene.metahuman_to_manny_settings
-        selected_objects = bpy.context.selected_objects
+        selected_objects = context.selected_objects
         mesh = None
         armature = None
 
