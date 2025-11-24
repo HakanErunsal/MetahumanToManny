@@ -13,6 +13,28 @@ Tools to clean up MetaHuman meshes for Manny skeleton compatibility. Focus on ve
 ## Where to find it
 - 3D Viewport → Sidebar (N) → Tab: "MetahumanToManny" → Panel: "MetahumanToManny".
 
+## Quick Start
+
+### Instant Conversion
+
+- Export the desired MetaHuman skeletal meshes to Manny from Unreal.
+- Import the meshes into Blender.
+- Select one LOD mesh, then Shift-select the armature.
+- Run **In Place Conversion**. All remaining LODs are processed automatically.
+- Select an LOD mesh again and run **Setup LOD Hierarchy**.
+- Select all meshes, including the LOD empty parent, then Shift-select the armature and export.
+
+### Export Settings
+
+- **Selected Objects:** true
+- **Object Types:** Empty, Armature, Mesh
+- **Forward:** Y Forward
+- **Up:** Z Up
+- **Smoothing:** Face
+- **Add Leaf Bones:** false
+
+**Note:** Only the face mesh requires material section reordering.
+
 ## Operators
 
 ### In Place Conversion
