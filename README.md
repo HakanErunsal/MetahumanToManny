@@ -6,7 +6,7 @@ Tools to clean up MetaHuman meshes for Manny skeleton compatibility. Focus on ve
 - Blender 4.2.4 or newer (per `bl_info`)
 
 ## Installation
-- Option A (ZIP): Use the packaged file in `dist/MetahumanToManny-1.0.10.zip`.
+- Option A (ZIP): Use the packaged file in `dist/MetahumanToManny-1.2.0.zip`.
   - Blender → Edit → Preferences → Add-ons → Install → select the ZIP → enable "MetahumanToManny".
 - Option B (Folder): Copy the folder `MetahumanToManny` into your Blender addons path.
 
