@@ -15,6 +15,10 @@ Tools to clean up MetaHuman meshes for Manny skeleton compatibility. Focus on ve
 
 ## Operators
 
+### In Place Conversion
+- **Convert Skeleton To Manny** (`object.in_place_conversion`)
+  - Converts the selected mesh, it's LOD variants and the selected armature to Manny hierarchy.
+
 ### Face Cleanup
 - **Clean Up Face Bone Weights** (`object.cleanup_bone_weights`)
   - Merges child bone weights into `head`, `neck_02`, `neck_01`.

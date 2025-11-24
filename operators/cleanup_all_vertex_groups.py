@@ -7,10 +7,19 @@ class CleanupAllVertexGroupsOperator(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        # Ensure a mesh object is selected
-        if not context.object or context.object.type != 'MESH':
+        # Find mesh object from selection (ignore armatures)
+        mesh = None
+        for obj in context.selected_objects:
+            if obj.type == 'MESH':
+                mesh = obj
+                break
+        
+        if not mesh:
             self.report({'ERROR'}, "Please select a mesh object.")
             return {'CANCELLED'}
+        
+        # Set mesh as active
+        context.view_layer.objects.active = mesh
 
         print("\n=== Running All Vertex Group Cleanups ===")
         

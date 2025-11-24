@@ -18,6 +18,13 @@ class BoneWeightCleanupPanel(bpy.types.Panel):
         layout = self.layout
         settings = context.scene.metahuman_to_manny_settings
 
+        # In Place Conversion section (top)
+        box = layout.box()
+        box.label(text="In Place Conversion", icon='MODIFIER')
+        box.operator("object.in_place_conversion", text="In Place Conversion")
+        
+        layout.separator()
+
         # Settings section
         box = layout.box()
         box.label(text="Settings", icon='PREFERENCES')

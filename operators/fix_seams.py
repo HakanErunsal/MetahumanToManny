@@ -46,12 +46,16 @@ class FixSeamsOperator(bpy.types.Operator):
     def execute(self, context):
         settings = context.scene.metahuman_to_manny_settings
         
-        # Ensure there is a mesh object selected
-        if not context.object or context.object.type != 'MESH':
+        # Find mesh object from selection (ignore armatures)
+        mesh = None
+        for obj in context.selected_objects:
+            if obj.type == 'MESH':
+                mesh = obj
+                break
+        
+        if not mesh:
             self.report({'ERROR'}, "Please select a mesh object.")
             return {'CANCELLED'}
-
-        mesh = context.object
         
         # Find all LOD meshes if enabled
         meshes_to_process = []
