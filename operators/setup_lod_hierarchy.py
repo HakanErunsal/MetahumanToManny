@@ -1,42 +1,8 @@
 import bpy
 import re
 
-def find_all_lod_meshes(base_mesh):
-    """Find all LOD meshes related to the selected mesh (LOD0, LOD1, LOD2, etc.)"""
-    all_meshes = [obj for obj in bpy.data.objects if obj.type == 'MESH']
-    lod_pattern = re.compile(r'_LOD\d+$')
-    
-    # Check if the base mesh itself has LOD suffix
-    base_name = base_mesh.name
-    match = lod_pattern.search(base_name)
-    
-    if match:
-        # Remove the LOD suffix to get the base name (e.g., "FaceMesh_LOD0" -> "FaceMesh")
-        prefix = base_name[:match.start()]
-    else:
-        # If no LOD suffix, use the full name as prefix
-        prefix = base_name
-    
-    print(f"Looking for LOD meshes with prefix: '{prefix}'")
-    
-    # Find all meshes that match: prefix + "_LOD" + digit(s)
-    lod_meshes = []
-    for obj in all_meshes:
-        match = lod_pattern.search(obj.name)
-        if match:
-            # Get the prefix of this object
-            obj_prefix = obj.name[:match.start()]
-            # Only include if the prefix matches exactly
-            if obj_prefix == prefix:
-                lod_meshes.append(obj)
-                print(f"  Found matching LOD: {obj.name}")
-    
-    # If we found LOD meshes, return them sorted; otherwise just return the base mesh
-    if lod_meshes:
-        lod_meshes.sort(key=lambda x: x.name)  # Sort for consistent ordering
-        return lod_meshes, prefix
-    else:
-        return [base_mesh], prefix
+from .utils import find_all_lod_meshes, ensure_object_mode, get_target_mesh
+
 
 class SetupLodHierarchyOperator(bpy.types.Operator):
     bl_idname = "object.setup_lod_hierarchy"
@@ -45,30 +11,32 @@ class SetupLodHierarchyOperator(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        # Ensure a mesh object is selected
-        if not context.object or context.object.type != 'MESH':
+        mesh = get_target_mesh(context)
+        if not mesh:
             self.report({'ERROR'}, "Please select a mesh object.")
             return {'CANCELLED'}
 
-        mesh = context.object
-        
-        # Find all LOD meshes
-        lod_meshes, prefix = find_all_lod_meshes(mesh)
-        
-        if not lod_meshes:
-            self.report({'ERROR'}, "No LOD meshes found.")
-            return {'CANCELLED'}
-        
+        ensure_object_mode(context)
+
+        # Find all LOD meshes (and the shared prefix).
+        lod_meshes, prefix = find_all_lod_meshes(mesh, return_prefix=True)
+
+        # Warn when the mesh has no LOD siblings, so inconsistent naming
+        # (e.g. "Body_LOD_0" which the _LOD\d+ pattern rejects) is visible.
+        if len(lod_meshes) == 1:
+            self.report({'WARNING'},
+                        f"No LOD siblings found for '{mesh.name}'. "
+                        f"Expected names like '{prefix}_LOD0', '{prefix}_LOD1'. "
+                        "Creating a single-mesh LodGroup.")
+
         # Look for or create the LodGroup object
         lod_group_name = f"{prefix}_LodGroup"
 
         # Always delete existing LodGroup object if it exists
         lod_group = bpy.data.objects.get(lod_group_name)
         if lod_group:
-            # Unlink from all collections
             for coll in lod_group.users_collection:
                 coll.objects.unlink(lod_group)
-            # Remove from bpy.data.objects
             bpy.data.objects.remove(lod_group)
             print(f"Deleted existing LodGroup object: {lod_group_name}")
 
@@ -91,17 +59,8 @@ class SetupLodHierarchyOperator(bpy.types.Operator):
         lod_meshes.sort(key=get_lod_number)
         print(f"Sorted order: {[obj.name for obj in lod_meshes]}")
 
-
-        # Parent all LOD meshes to the LodGroup with keep transform
+        # Parent all LOD meshes to the LodGroup, keeping their transforms.
         for lod_mesh in lod_meshes:
-            # Store current world matrix
-            # old_matrix = lod_mesh.matrix_world.copy()
-
-            # Set parent with keep transform
-            # lod_mesh.parent = lod_group
-            # lod_mesh.matrix_parent_inverse.identity()
-            # lod_mesh.matrix_world = old_matrix
-
             bpy.ops.object.select_all(action='DESELECT')
             lod_group.select_set(True)
             lod_mesh.select_set(True)
@@ -120,14 +79,17 @@ class SetupLodHierarchyOperator(bpy.types.Operator):
 
         print(f"Added custom property 'fbx_type' = 'LodGroup' to {lod_group_name}")
 
-        self.report({'INFO'}, f"LOD hierarchy setup complete! Parented {len(lod_meshes)} mesh(es) to {lod_group_name}")
+        self.report({'INFO'}, f"Parented {len(lod_meshes)} mesh(es) to {lod_group_name}.")
         return {'FINISHED'}
+
 
 def register():
     bpy.utils.register_class(SetupLodHierarchyOperator)
 
+
 def unregister():
     bpy.utils.unregister_class(SetupLodHierarchyOperator)
+
 
 if __name__ == "__main__":
     register()

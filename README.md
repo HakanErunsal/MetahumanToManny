@@ -1,68 +1,71 @@
-# MetahumanToManny (Blender 4.2)
+# MetahumanToManny
 
-Tools to clean up MetaHuman meshes for Manny skeleton compatibility. Focus on vertex-group fixes, minor modeling ops, and armature-aligned cleanup.
+A Blender 4.2+ add-on that cleans up MetaHuman meshes and rigs so they bind to the UE5 **Manny** skeleton: vertex-group fixes, seam and weight cleanup, LOD hierarchy setup, and IK-bone generation.
 
 ## Requirements
-- Blender 4.2.4 or newer (per `bl_info`)
+
+Blender 4.2.0 or newer.
 
 ## Installation
-- Option A (ZIP): Use the packaged file in `dist/MetahumanToManny-1.2.0.zip`.
-  - Blender → Edit → Preferences → Add-ons → Install → select the ZIP → enable "MetahumanToManny".
-- Option B (Folder): Copy the folder `MetahumanToManny` into your Blender addons path.
 
-## Where to find it
-- 3D Viewport → Sidebar (N) → Tab: "MetahumanToManny" → Panel: "MetahumanToManny".
+1. Download `MetahumanToManny-<version>.zip` from the [Releases](https://github.com/HakanErunsal/MetahumanToManny/releases) page.
+2. In Blender, open **Edit → Preferences → Get Extensions**, click the **⌄** menu (top right), choose **Install from Disk**, and pick the zip.
 
-## Quick Start
+Find the panel under **3D Viewport → Sidebar (`N`) → MetahumanToManny** tab.
 
-### Instant Conversion
+## Quick start
 
-- Export the desired MetaHuman skeletal meshes to Manny from Unreal.
-- Import the meshes into Blender.
-- Select one LOD mesh, then Shift-select the armature.
-- Run **In Place Conversion**. All remaining LODs are processed automatically.
-- Select an LOD mesh again and run **Setup LOD Hierarchy**.
-- Select all meshes, including the LOD empty parent, then Shift-select the armature and export.
+The **Quick Convert** section covers most conversions:
 
-### Export Settings
+1. Export the MetaHuman skeletal meshes to Manny from Unreal, then import them into Blender.
+2. Select one LOD mesh, then Shift-select the armature.
+3. Click **Convert Skeleton To Manny**. The add-on processes the remaining LODs in the same run.
+4. Optional: click **Generate IK Bones** to add the UE5 Manny IK bones.
+5. Select an LOD mesh again and run **Setup LOD Hierarchy** (under Manual Steps).
+6. Select every mesh plus the LOD empty, Shift-select the armature, and export.
 
-- **Selected Objects:** true
-- **Object Types:** Empty, Armature, Mesh
-- **Forward:** Y Forward
-- **Up:** Z Up
-- **Smoothing:** Face
-- **Add Leaf Bones:** false
+### FBX export settings
 
-**Note:** Only the face mesh requires material section reordering.
+| Setting | Value |
+| --- | --- |
+| Selected Objects | true |
+| Object Types | Empty, Armature, Mesh |
+| Forward | Y Forward |
+| Up | Z Up |
+| Smoothing | Face |
+| Add Leaf Bones | false |
+
+Only the face mesh needs material-section reordering.
+
+## Panel layout
+
+**Quick Convert** holds the two buttons most conversions need: **Convert Skeleton To Manny** and **Generate IK Bones**. **Manual Steps** (collapsed by default) holds each stage for one-at-a-time conversion.
 
 ## Operators
 
-### In Place Conversion
-- **Convert Skeleton To Manny** (`object.in_place_conversion`)
-  - Converts the selected mesh, it's LOD variants and the selected armature to Manny hierarchy.
+### Quick Convert
 
-### Face Cleanup
-- **Clean Up Face Bone Weights** (`object.cleanup_bone_weights`)
-  - Merges child bone weights into `head`, `neck_02`, `neck_01`.
+**Convert Skeleton To Manny** (`object.in_place_conversion`):
+runs Clean Up Face Bone Weights, Cleanup All Vertex Groups, and Fix Seams on the selected mesh and its LODs, then removes every armature bone not in `bone_keep_list.json`.
 
-### Vertex Groups
-- **Cleanup All** (`object.cleanup_all_vertex_groups`)
-  - Runs all vertex group cleanup operations: Fix Twist Bones, Fix Finger Bulges, Fix Toes.
-- **Fix Twist Bone Names** (`object.fix_twist_bone_names`)
-  - Renames `*twistCor*` groups to `*twist*` and removes duplicates.
-- **Fix Finger Bulges** (`object.fix_finger_bulges`)
-  - Merges `*_bulge` groups into base groups and removes bulges.
-- **Fix Toes** (`object.fix_toes`)
-  - Merges toe groups into `ball_l` / `ball_r`.
-- **Cleanup Unused Groups** (`object.cleanup_unused_vertex_groups`)
-  - Select both a Mesh and its Armature. Deletes vertex groups that don't map to bones.
+**Generate IK Bones** (`object.generate_ik_bones`):
+adds the UE5 Manny IK/auxiliary bones (`ik_foot_root`, `ik_foot_l/r`, `ik_hand_root`, `ik_hand_gun`, `ik_hand_l/r`, `interaction`, `center_of_mass`) to the selected armature. The bones are non-deforming, rebuild on re-run, and work on skeletons that have no root bone.
 
-### Mesh Cleanup
-- **Fix Seams** (`object.fix_seams`)
-  - Get rid of seams that cause problems after binding to new skeleton.
+### Manual Steps
 
-### Hierarchy
-- **Setup LOD Hierarchy** (`object.setup_lod_hierarchy`)
-  - Sets up the LOD mesh hierarchy for the selected mesh.
-- **Bind to Manny** (`object.bind_to_manny`)
-  - Binds the selected mesh to the Manny skeleton.
+**Face Cleanup**
+- **Clean Up Face Bone Weights** (`object.cleanup_bone_weights`): merges child-bone weights into `head`, `neck_02`, `neck_01`.
+
+**Vertex Groups**
+- **Cleanup All** (`object.cleanup_all_vertex_groups`): runs Fix Twist Bone Names, Fix Finger Bulges, and Fix Toes.
+- **Fix Twist Bone Names** (`object.fix_twist_bone_names`): renames `*twistCor*` groups to `*twist*`, merging the weights into any existing `*twist*` group.
+- **Fix Finger Bulges** (`object.fix_finger_bulges`): merges `*_bulge` groups into their base groups and removes the bulges.
+- **Fix Toes** (`object.fix_toes`): merges toe groups into `ball_l` / `ball_r`.
+- **Cleanup Unused Groups** (`object.cleanup_unused_vertex_groups`): with a mesh and its armature selected, deletes vertex groups that map to no bone.
+
+**Mesh Cleanup**
+- **Fix Seams** (`object.fix_seams`): merges duplicate seam vertices that break skinning after a rebind.
+
+**Hierarchy**
+- **Setup LOD Hierarchy** (`object.setup_lod_hierarchy`): parents the LOD meshes to a LodGroup empty so Unreal recognizes the LODs on import.
+- **Bind to Manny** (`object.bind_to_manny`): binds the selected mesh to the Manny skeleton.

@@ -1,12 +1,12 @@
-from .operators import cleanup_bone_weights, fix_twist_bone_names, fix_seams, fix_toes, cleanup_unused_vertex_groups, fix_finger_bulges, setup_lod_hierarchy, cleanup_all_vertex_groups, bind_to_manny, in_place_conversion
+from .operators import cleanup_bone_weights, fix_twist_bone_names, fix_seams, fix_toes, cleanup_unused_vertex_groups, fix_finger_bulges, setup_lod_hierarchy, cleanup_all_vertex_groups, bind_to_manny, in_place_conversion, generate_ik_bones
 from .ui import panel
 
 bl_info = {
     "name": "MetahumanToManny",
-    "blender": (4, 2, 4),
+    "blender": (4, 2, 0),
     "category": "Object",
     "author": "Hakan",
-    "version": (1, 2, 0),
+    "version": (1, 3, 0),
     "description": "Collection of tools for cleaning up armature vertex groups and fixing issues to make it compatible with Manny.",
     "support": "COMMUNITY",
     "doc_url": "",
@@ -25,6 +25,7 @@ def register():
     cleanup_all_vertex_groups.register()
     bind_to_manny.register()
     in_place_conversion.register()
+    generate_ik_bones.register()
     panel.register()
 
 def unregister():
@@ -38,6 +39,7 @@ def unregister():
     cleanup_all_vertex_groups.unregister()
     bind_to_manny.unregister()
     in_place_conversion.unregister()
+    generate_ik_bones.unregister()
     panel.unregister()
 
 if __name__ == "__main__":

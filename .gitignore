@@ -1,2 +1,4 @@
-blender_manifest.toml
 *.zip
+__pycache__/
+*.pyc
+CLAUDE.md
