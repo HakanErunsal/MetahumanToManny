@@ -57,9 +57,9 @@ adds the UE5 Manny IK/auxiliary bones (`ik_foot_root`, `ik_foot_l/r`, `ik_hand_r
 - **Clean Up Face Bone Weights** (`object.cleanup_bone_weights`): merges child-bone weights into `head`, `neck_02`, `neck_01`.
 
 **Vertex Groups**
-- **Cleanup All** (`object.cleanup_all_vertex_groups`): runs Fix Twist Bone Names, Fix Finger Bulges, and Fix Toes.
+- **Cleanup All** (`object.cleanup_all_vertex_groups`): runs Fix Twist Bone Names, Fix Finger Helpers, and Fix Toes.
 - **Fix Twist Bone Names** (`object.fix_twist_bone_names`): renames `*twistCor*` groups to `*twist*`, merging the weights into any existing `*twist*` group.
-- **Fix Finger Bulges** (`object.fix_finger_bulges`): merges `*_bulge` groups into their base groups and removes the bulges.
+- **Fix Finger Helpers** (`object.fix_finger_bulges`): merges MetaHuman finger helper groups (`*_bulge_l`, `*_half_r`, `*_mcp_*`, `*_pip_*`, `*_dip_*`, `*_palm_*`, `*_palmMid_*`, `*_side_inn_*`, `*_side_out_*`, `*_in_*`, `*_slide_*`) into the Manny finger bone they belong to, then removes them. Without this the helper-only vertices at the pinky and ring fingertips bind to nothing.
 - **Fix Toes** (`object.fix_toes`): merges toe groups into `ball_l` / `ball_r`.
 - **Cleanup Unused Groups** (`object.cleanup_unused_vertex_groups`): with a mesh and its armature selected, deletes vertex groups that map to no bone.
 

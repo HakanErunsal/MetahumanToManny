@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "MetahumanToManny"
-version = "1.3.0"
+version = "1.3.1"
 name = "MetahumanToManny"
 tagline = "Clean up MetaHuman meshes and match them to UE5 Manny"
 maintainer = "hakanerunsal2@gmail.com"

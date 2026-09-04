@@ -73,7 +73,12 @@ def merge_vertex_group_weights(obj, src_group_name, target_group_name,
         try:
             src_weight = src_group.weight(v.index)
         except RuntimeError:
-            src_weight = 0
+            # Vertex is not in the source group, so there is nothing to add.
+            # Skipping also keeps the target group from collecting a
+            # zero-weight entry for every vertex in the mesh.
+            continue
+        if src_weight == 0.0:
+            continue
         try:
             target_weight = target_group.weight(v.index)
         except RuntimeError:
@@ -84,6 +89,20 @@ def merge_vertex_group_weights(obj, src_group_name, target_group_name,
         print(f"Deleting vertex group: {src_group_name}")
         obj.vertex_groups.remove(src_group)
     return True
+
+
+def find_deform_armature(mesh):
+    """Return the armature deforming ``mesh``, or None.
+
+    Prefers the object's Armature modifier, falling back to an armature parent
+    for meshes that are parented but not modifier-bound.
+    """
+    for mod in mesh.modifiers:
+        if mod.type == 'ARMATURE' and mod.object:
+            return mod.object
+    if mesh.parent and mesh.parent.type == 'ARMATURE':
+        return mesh.parent
+    return None
 
 
 def ensure_object_mode(context):

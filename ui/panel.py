@@ -59,7 +59,7 @@ class OBJECT_PT_metahuman_to_manny_manual(bpy.types.Panel):
         box.operator("object.cleanup_all_vertex_groups", text="Cleanup All")
         box.separator()
         box.operator("object.fix_twist_bone_names", text="Fix Twist Bone Names")
-        box.operator("object.fix_finger_bulges", text="Fix Finger Bulges")
+        box.operator("object.fix_finger_bulges", text="Fix Finger Helpers")
         box.operator("object.fix_toes", text="Fix Toes")
         box.operator("object.cleanup_unused_vertex_groups", text="Cleanup Unused Groups")
 

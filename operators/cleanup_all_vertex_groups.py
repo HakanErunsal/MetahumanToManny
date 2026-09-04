@@ -6,7 +6,7 @@ from .utils import ensure_object_mode, get_target_mesh
 class CleanupAllVertexGroupsOperator(bpy.types.Operator):
     bl_idname = "object.cleanup_all_vertex_groups"
     bl_label = "Cleanup All"
-    bl_description = "Runs all vertex group cleanup operations: Fix Twist Bones, Fix Finger Bulges, Fix Toes"
+    bl_description = "Runs all vertex group cleanup operations: Fix Twist Bones, Fix Finger Helpers, Fix Toes"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -26,7 +26,7 @@ class CleanupAllVertexGroupsOperator(bpy.types.Operator):
         print("\n[1/3] Running Fix Twist Bone Names...")
         bpy.ops.object.fix_twist_bone_names()
 
-        print("\n[2/3] Running Fix Finger Bulges...")
+        print("\n[2/3] Running Fix Finger Helpers...")
         bpy.ops.object.fix_finger_bulges()
 
         print("\n[3/3] Running Fix Toes...")
